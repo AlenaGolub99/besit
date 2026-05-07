@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>БЕСИТ БЛ*ТЬ</title>
+    <style>
+        /* Строгий стиль: серый, черный, темно-красный */
+        body {
+            background-color: #1a1a1a;
+            color: #d1d1d1;
+            font-family: "Times New Roman", Times, serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            line-height: 1.6;
+            transition: background-color 1s;
+        }
+
+        #game-window {
+            width: 100%;
+            max-width: 700px;
+            padding: 40px;
+            border: 1px solid #333;
+            background-color: #121212;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        header {
+            border-bottom: 1px solid #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stress-label {
+            font-variant: small-caps;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        #stress-container {
+            width: 250px;
+            height: 6px;
+            background: #222;
+            border: 1px solid #444;
+        }
+
+        #stress-fill {
+            width: 0%;
+            height: 100%;
+            background: #800000;
+            transition: width 0.5s ease;
+        }
+
+        .illustration-box {
+            height: 350px;
+            border: 1px solid #222;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #0d0d0d;
+            overflow: hidden;
+        }
+
+        .illustration-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Мрачный фильтр для атмосферы */
+            filter: grayscale(100%) contrast(110%);
+            opacity: 0.8;
+        }
+
+        .story-text {
+            font-size: 1.25rem;
+            margin-bottom: 300px; /* Чтобы кнопки всегда были внизу */
+            min-height: 100px;
+        }
+
+        /* Чтобы текст не прыгал, фиксируем высоту блока контента */
+        #content-area {
+            min-height: 450px;
+        }
+
+        .choices {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        button {
+            background: none;
+            border: 1px solid #444;
+            color: #aaa;
+            padding: 15px;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            border-color: #800000;
+            color: #fff;
+            background: #1a0505;
+        }
+
+        #game-over, #game-win {
+            display: none;
+            text-align: center;
+        }
+
+        .critical {
+            animation: shake 0.2s infinite;
+            background: #ff0000 !important;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px); }
+            50% { transform: translate(-1px, -1px); }
+            100% { transform: translate(1px, -1px); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-window">
+    <div id="game-content">
+        <header>
+            <span class="stress-label">Индикатор напряжения</span>
+            <div id="stress-container">
+                <div id="stress-fill"></div>
+            </div>
+        </header>
+
+        <div id="content-area">
+            <div class="illustration-box">
+                <img id="scenario-img" src="" alt="Текущая ситуация">
+            </div>
+
+            <div class="story-text" id="story">
+                Идет загрузка вашего самого бесячего дня...
+            </div>
+        </div>
+
+        <div class="choices" id="choice-buttons">
+            <button id="btn-left" onclick="makeChoice(0)"></button>
+            <button id="btn-right" onclick="makeChoice(1)"></button>
+        </div>
+    </div>
+
+    <!-- Экран проигрыша -->
+    <div id="game-over">
+        <h2 style="color: #800000; font-size: 2rem;">НЕРВНЫЙ СРЫВ</h2>
+        <p>Ваше терпение лопнуло. Вы наговорили лишнего, ударили дверью и теперь сидите в тишине, осознавая последствия своего гнева.</p>
+        <button onclick="location.reload()" style="width: 100%; margin-top: 20px;">Попробовать прожить этот день иначе</button>
+    </div>
+
+    <!-- Экран победы -->
+    <div id="game-win">
+        <h2 style="color: #444; font-size: 2rem;">ДЕНЬ ЗАВЕРШЕН</h2>
+        <p>Вы добрались до кровати. Несмотря на всё, что произошло, вы сохранили лицо. Вы — мастер самообладания. Но завтра будет новый день.</p>
+        <button onclick="location.reload()" style="width: 100%; margin-top: 20px;">Начать заново</button>
+    </div>
+</div>
+
+<script>
+    let stress = 0;
+    let step = 0;
+
+    // Массив сценариев. Убедись, что файлы лежат в папке img/
+    const scenarios = [
+        {
+            img: "img/door.jpg",
+            text: "Сегодня твой самый бесячий день. Ты проснулась не от будильника, а от настойчивого стука в дверь — пришли какие-то люди поговорить о боге в твой единственный выходной.",
+            options: [
+                { txt: "Сказать, что ты занята, и закрыть дверь", stress: 5 },
+                { txt: "Прочитать им лекцию о том, как бесит стук в 7 утра", stress: 25 }
+            ]
+        },
+        {
+            img: "img/kitchen.jpg",
+            text: "На кухне ты обнаруживаешь, что кто-то оставил пустой пакет из-под молока в холодильнике, а вся раковина завалена посудой, которую ты мыла вчера вечером.",
+            options: [
+                { txt: "Молча начать мыть тарелки", stress: 10 },
+                { txt: "Громко хлопнуть дверцей холодильника", stress: 20 }
+            ]
+        },
+        {
+            img: "img/bus.jpg",
+            text: "В автобусе душно. Какая-то женщина решила, что твоё плечо — отличная подставка для её мокрого зонта, и наставительно чихает прямо тебе в ухо.",
+            options: [
+                { txt: "Отойти в сторону, если есть место", stress: 15 },
+                { txt: "Посмотреть на неё так, чтобы ей стало неловко", stress: 30 }
+            ]
+        },
+        {
+            img: "img/office.jpg",
+            text: "Рабочий компьютер решает установить критическое обновление именно тогда, когда ты не сохранила важную часть документа. Процент загрузки замер на 99%.",
+            options: [
+                { txt: "Сходить за чаем и выдохнуть", stress: 10 },
+                { txt: "Ударить ладонью по столу", stress: 35 }
+            ]
+        },
+        {
+            img: "img/courier.jpg",
+            text: "Курьер привозит еду. Она холодная, а пакет промок от соуса. Он улыбается и просит пять звезд в приложении.",
+            options: [
+                { txt: "Молча забрать еду", stress: 15 },
+                { txt: "Написать гневный отзыв", stress: 25 }
+            ]
+        }
+    ];
+
+    function updateUI() {
+        const fill = document.getElementById('stress-fill');
+        fill.style.width = stress + '%';
+
+        // Если стресс высокий — экран начинает дрожать
+        if (stress > 70) {
+            fill.classList.add('critical');
+            document.body.style.backgroundColor = "#2a1515";
+        }
+
+        // Проверка на проигрыш
+        if (stress >= 100) {
+            document.getElementById('game-content').style.display = 'none';
+            document.getElementById('game-over').style.display = 'block';
+            return;
+        }
+
+        // Рендерим текущую ситуацию
+        const s = scenarios[step];
+        document.getElementById('scenario-img').src = s.img;
+        document.getElementById('story').innerText = s.text;
+        document.getElementById('btn-left').innerText = s.options[0].txt;
+        document.getElementById('btn-right').innerText = s.options[1].txt;
+    }
+
+    function makeChoice(idx) {
+        stress += scenarios[step].options[idx].stress;
+        step++;
+
+        if (step < scenarios.length) {
+            updateUI();
+        } else {
+            // Если прошли все ситуации и не взорвались
+            document.getElementById('game-content').style.display = 'none';
+            document.getElementById('game-win').style.display = 'block';
+        }
+    }
+
+    // Запускаем первую сцену
+    updateUI();
+</script>
+
+</body>
+</html>
