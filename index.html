@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>БЕСИТ БЛ*ТЬ</title>
     <style>
-        /* Строгий стиль: серый, черный, темно-красный */
         body {
             background-color: #1a1a1a;
             color: #d1d1d1;
@@ -20,11 +19,27 @@
 
         #game-window {
             width: 100%;
-            max-width: 700px;
+            max-width: 750px;
             padding: 40px;
             border: 1px solid #333;
             background-color: #121212;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        /* Стартовое окно */
+        #start-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #121212;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            box-sizing: border-box;
+            text-align: center;
         }
 
         header {
@@ -36,11 +51,7 @@
             align-items: center;
         }
 
-        .stress-label {
-            font-variant: small-caps;
-            letter-spacing: 1px;
-            font-size: 0.9rem;
-        }
+        .stress-label { font-variant: small-caps; letter-spacing: 1px; font-size: 0.9rem; }
 
         #stress-container {
             width: 250px;
@@ -57,7 +68,7 @@
         }
 
         .illustration-box {
-            height: 350px;
+            height: 300px;
             border: 1px solid #222;
             margin-bottom: 20px;
             display: flex;
@@ -71,20 +82,14 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* Мрачный фильтр для атмосферы */
             filter: grayscale(100%) contrast(110%);
             opacity: 0.8;
         }
 
         .story-text {
-            font-size: 1.25rem;
-            margin-bottom: 300px; /* Чтобы кнопки всегда были внизу */
-            min-height: 100px;
-        }
-
-        /* Чтобы текст не прыгал, фиксируем высоту блока контента */
-        #content-area {
-            min-height: 450px;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            min-height: 90px;
         }
 
         .choices {
@@ -101,7 +106,6 @@
             font-family: "Times New Roman", Times, serif;
             font-size: 1rem;
             cursor: pointer;
-            text-align: center;
             transition: all 0.2s;
         }
 
@@ -111,15 +115,9 @@
             background: #1a0505;
         }
 
-        #game-over, #game-win {
-            display: none;
-            text-align: center;
-        }
+        #game-over, #game-win { display: none; text-align: center; }
 
-        .critical {
-            animation: shake 0.2s infinite;
-            background: #ff0000 !important;
-        }
+        .critical { animation: shake 0.2s infinite; background: #ff0000 !important; }
 
         @keyframes shake {
             0% { transform: translate(1px, 1px); }
@@ -131,42 +129,48 @@
 <body>
 
 <div id="game-window">
-    <div id="game-content">
+    <!-- Начальный экран -->
+    <div id="start-screen">
+        <h1 style="color: #800000; font-weight: normal;">БЕСИТ БЛ*ТЬ</h1>
+        <p>Добро пожаловать в симулятор самого тяжелого дня. <br><br>
+        Правила просты: перед вами будут возникать бытовые ситуации. <br>
+        У вас есть два пути: <b>смирение</b> или <b>реакция</b>. <br>
+        Каждое неспокойное действие заполняет шкалу напряжения. <br>
+        Если шкала дойдет до конца — вы сорветесь. <br><br>
+        Постарайтесь дожить до вечера.</p>
+        <button onclick="startGame()" style="padding: 15px 40px; margin-top: 20px;">НАЧАТЬ ДЕНЬ</button>
+    </div>
+
+    <div id="game-content" style="visibility: hidden;">
         <header>
-            <span class="stress-label">Индикатор напряжения</span>
+            <span class="stress-label">Шкала нервного напряжения</span>
             <div id="stress-container">
                 <div id="stress-fill"></div>
             </div>
         </header>
 
-        <div id="content-area">
-            <div class="illustration-box">
-                <img id="scenario-img" src="" alt="Текущая ситуация">
-            </div>
-
-            <div class="story-text" id="story">
-                Идет загрузка вашего самого бесячего дня...
-            </div>
+        <div class="illustration-box">
+            <img id="scenario-img" src="" alt="">
         </div>
 
-        <div class="choices" id="choice-buttons">
+        <div class="story-text" id="story"></div>
+
+        <div class="choices">
             <button id="btn-left" onclick="makeChoice(0)"></button>
             <button id="btn-right" onclick="makeChoice(1)"></button>
         </div>
     </div>
 
-    <!-- Экран проигрыша -->
     <div id="game-over">
-        <h2 style="color: #800000; font-size: 2rem;">НЕРВНЫЙ СРЫВ</h2>
-        <p>Ваше терпение лопнуло. Вы наговорили лишнего, ударили дверью и теперь сидите в тишине, осознавая последствия своего гнева.</p>
-        <button onclick="location.reload()" style="width: 100%; margin-top: 20px;">Попробовать прожить этот день иначе</button>
+        <h2 style="color: #800000;">НЕРВНЫЙ СРЫВ</h2>
+        <p>Вы больше не можете это терпеть. День закончился скандалом.</p>
+        <button onclick="location.reload()" style="width: 100%;">Попробовать снова</button>
     </div>
 
-    <!-- Экран победы -->
     <div id="game-win">
-        <h2 style="color: #444; font-size: 2rem;">ДЕНЬ ЗАВЕРШЕН</h2>
-        <p>Вы добрались до кровати. Несмотря на всё, что произошло, вы сохранили лицо. Вы — мастер самообладания. Но завтра будет новый день.</p>
-        <button onclick="location.reload()" style="width: 100%; margin-top: 20px;">Начать заново</button>
+        <h2 style="color: #444;">ВЫ ВЫЖИЛИ</h2>
+        <p>Вы добрались до подушки. Завтра будет новый день, такой же, как этот.</p>
+        <button onclick="location.reload()" style="width: 100%;">Пройти круг заново</button>
     </div>
 </div>
 
@@ -174,68 +178,105 @@
     let stress = 0;
     let step = 0;
 
-    // Массив сценариев. Убедись, что файлы лежат в папке img/
     const scenarios = [
         {
             img: "img/door.jpg",
-            text: "Сегодня твой самый бесячий день. Ты проснулась не от будильника, а от настойчивого стука в дверь — пришли какие-то люди поговорить о боге в твой единственный выходной.",
-            options: [
-                { txt: "Сказать, что ты занята, и закрыть дверь", stress: 5 },
-                { txt: "Прочитать им лекцию о том, как бесит стук в 7 утра", stress: 25 }
-            ]
+            text: "Вы проснулись не от будильника, а от настойчивого стука в дверь — пришли люди поговорить о боге.",
+            options: [{txt: "Молча закрыть дверь", stress: 5}, {txt: "Высказать им всё о боге", stress: 20}]
         },
         {
             img: "img/kitchen.jpg",
-            text: "На кухне ты обнаруживаешь, что кто-то оставил пустой пакет из-под молока в холодильнике, а вся раковина завалена посудой, которую ты мыла вчера вечером.",
-            options: [
-                { txt: "Молча начать мыть тарелки", stress: 10 },
-                { txt: "Громко хлопнуть дверцей холодильника", stress: 20 }
-            ]
+            text: "На кухне кто-то оставил пустую коробку из-под хлопьев на столе, а в раковине — гора посуды.",
+            options: [{txt: "Убрать за всеми", stress: 10}, {txt: "Швырнуть коробку в мусорку", stress: 20}]
+        },
+        {
+            img: "img/phone.jpg",
+            text: "Звонок с неизвестного номера. 'Здравствуйте, это служба безопасности банка, на вас оформлен кредит...'",
+            options: [{txt: "Сбросить вызов", stress: 5}, {txt: "Троллить их 10 минут", stress: 25}]
         },
         {
             img: "img/bus.jpg",
-            text: "В автобусе душно. Какая-то женщина решила, что твоё плечо — отличная подставка для её мокрого зонта, и наставительно чихает прямо тебе в ухо.",
-            options: [
-                { txt: "Отойти в сторону, если есть место", stress: 15 },
-                { txt: "Посмотреть на неё так, чтобы ей стало неловко", stress: 30 }
-            ]
+            text: "В автобусе на тебя чихнула бабка. Капли слюны медленно стекают по твоей щеке.",
+            options: [{txt: "Вытереться салфеткой", stress: 15}, {txt: "Чихнуть ей в ответ", stress: 40}]
         },
         {
-            img: "img/office.jpg",
-            text: "Рабочий компьютер решает установить критическое обновление именно тогда, когда ты не сохранила важную часть документа. Процент загрузки замер на 99%.",
-            options: [
-                { txt: "Сходить за чаем и выдохнуть", stress: 10 },
-                { txt: "Ударить ладонью по столу", stress: 35 }
-            ]
+            img: "img/slow_people.jpg",
+            text: "В дверях магазина встали двое и начали обсуждать рассаду, перегородив весь проход.",
+            options: [{txt: "Вежливо попросить пройти", stress: 10}, {txt: "Протаранить их плечом", stress: 30}]
+        },
+        {
+            img: "img/headset.jpg",
+            text: "Твои беспроводные наушники сели на самом интересном моменте песни. Заряжать некогда.",
+            options: [{txt: "Слушать шум города", stress: 15}, {txt: "Злобно запихать их в карман", stress: 25}]
+        },
+        {
+            img: "img/update.jpg",
+            text: "Рабочий ноутбук решил обновиться прямо во время важного созвона. 1%... 2%...",
+            options: [{txt: "Пойти пить чай", stress: 10}, {txt: "Ударить по крышке", stress: 35}]
+        },
+        {
+            img: "img/elevator.jpg",
+            text: "В лифте кто-то нажал все кнопки этажей и вышел на втором.",
+            options: [{txt: "Терпеливо ждать", stress: 20}, {txt: "Орать в пустоту лифта", stress: 40}]
+        },
+        {
+            img: "img/puddle.jpg",
+            text: "Проезжающая машина обдала тебя грязной водой из лужи. Твоё светлое пальто испорчено.",
+            options: [{txt: "Пойти домой переодеваться", stress: 25}, {txt: "Запомнить номер и проклясть", stress: 45}]
+        },
+        {
+            img: "img/colleague.jpg",
+            text: "Коллега за соседним столом сидит и ритмично щелкает ручкой. Клик-клак. Клик-клак.",
+            options: [{txt: "Надеть беруши", stress: 10}, {txt: "Отобрать и сломать ручку", stress: 30}]
         },
         {
             img: "img/courier.jpg",
-            text: "Курьер привозит еду. Она холодная, а пакет промок от соуса. Он улыбается и просит пять звезд в приложении.",
-            options: [
-                { txt: "Молча забрать еду", stress: 15 },
-                { txt: "Написать гневный отзыв", stress: 25 }
-            ]
+            text: "Курьер принес ледяную пиццу через 2 часа ожидания и требует чаевые.",
+            options: [{txt: "Молча закрыть дверь", stress: 15}, {txt: "Написать жалобу в поддержку", stress: 25}]
+        },
+        {
+            img: "img/supermarket.jpg",
+            text: "В очереди на кассе человек перед тобой начал искать мелочь на дне сумки. У него не хватает 2 рублей.",
+            options: [{txt: "Дать ему эти 2 рубля", stress: 5}, {txt: "Громко вздыхать", stress: 20}]
+        },
+        {
+            img: "img/keys.jpg",
+            text: "Ты стоишь у подъезда и понимаешь, что ключи лежат на самом дне огромной сумки под продуктами.",
+            options: [{txt: "Спокойно всё достать", stress: 10}, {txt: "Вытряхнуть всё на асфальт", stress: 35}]
+        },
+        {
+            img: "img/neighbors.jpg",
+            text: "Сосед сверху начал сверлить стену в 21:00, когда ты наконец прилегла.",
+            options: [{txt: "Включить музыку громче", stress: 20}, {txt: "Стучать по батарее", stress: 40}]
+        },
+        {
+            img: "img/bed.jpg",
+            text: "Ты ложишься в кровать, и в этот момент комар начинает жужжать прямо над ухом.",
+            options: [{txt: "Укрыться одеялом с головой", stress: 15}, {txt: "Включить свет и начать охоту", stress: 40}]
         }
     ];
+
+    function startGame() {
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('game-content').style.visibility = 'visible';
+        updateUI();
+    }
 
     function updateUI() {
         const fill = document.getElementById('stress-fill');
         fill.style.width = stress + '%';
 
-        // Если стресс высокий — экран начинает дрожать
-        if (stress > 70) {
+        if (stress > 75) {
             fill.classList.add('critical');
             document.body.style.backgroundColor = "#2a1515";
         }
 
-        // Проверка на проигрыш
         if (stress >= 100) {
             document.getElementById('game-content').style.display = 'none';
             document.getElementById('game-over').style.display = 'block';
             return;
         }
 
-        // Рендерим текущую ситуацию
         const s = scenarios[step];
         document.getElementById('scenario-img').src = s.img;
         document.getElementById('story').innerText = s.text;
@@ -250,15 +291,10 @@
         if (step < scenarios.length) {
             updateUI();
         } else {
-            // Если прошли все ситуации и не взорвались
             document.getElementById('game-content').style.display = 'none';
             document.getElementById('game-win').style.display = 'block';
         }
     }
-
-    // Запускаем первую сцену
-    updateUI();
 </script>
-
 </body>
 </html>
